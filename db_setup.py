@@ -13,6 +13,7 @@ def setup_database():
     cur.execute('''
     CREATE TABLE hair_recommend (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        gender TEXT NOT NULL,  -- 'male' 또는 'female'
         face_shape TEXT NOT NULL,
         style_name TEXT NOT NULL,
         advice TEXT
@@ -22,16 +23,23 @@ def setup_database():
     # 4. 추천 데이터 리스트 
     # 중요: 첫 번째 항목(face_shape)은 train.py에서 출력된 class_names와 정확히 일치해야 합니다.
     recommend_list = [
-        ('Oval Face', '웨이브 단발', '어떤 스타일도 잘 어울리는 얼굴형입니다. 볼륨감 있는 웨이브로 세련미를 더해보세요.'),
-        ('Round Face', '보이시한 커트 단발', '얼굴이 길어 보일 수 있도록 정수리 부분에 볼륨을 주고 옆머리는 차분하게 내리는 것을 추천합니다.'),
-        ('Square Face', '앞머리 없는 롱헤어', '턱선을 부드럽게 감싸는 레이어드 컷으로 각진 부분을 커버하고 우아한 분위기를 연출하세요.'),
-        ('Heart Face', '중단발 C컬 펌', '턱 라인이 뾰족해 보일 수 있으므로 하단에 볼륨을 주는 C컬 스타일로 시선을 분산시키세요.'),
-        ('Long Face', '가르마 없는 볼륨 펌', '얼굴이 짧아 보이도록 앞머리를 내리고 옆볼륨을 살린 펌 스타일이 가장 베스트입니다.')
+        # --- 여성 (female) ---
+        ('female', '계란형(Oval Face)', '웨이브 단발', '세련미를 더하는 볼륨 웨이브를 추천합니다.'),
+        ('female', '둥근형(Round Face)', '레이어드 컷', '옆머리로 볼살을 커버하여 갸름해 보이는 효과를 줍니다.'),
+        ('female', '사각형(Square Face)', '사이드뱅 롱헤어', '부드러운 곡선 위주로 각진 턱선을 가려보세요.'),
+        ('female', '하트형(Heart Face)', '중단발 C컬 펌', '하단 볼륨으로 뾰족한 턱 끝을 보완합니다.'),
+        ('female', '긴형(Long Face)', '풀뱅 앞머리', '얼굴 길이를 짧아 보이게 하는 앞머리 스타일이 베스트입니다.'),
+        
+        # --- 남성 (male) ---
+        ('male', '계란형(Oval Face)', '리프 컷', '자연스러운 가르마로 부드러운 이미지를 강조하세요.'),
+        ('male', '둥근형(Round Face)', '리젠트 컷', '옆머리는 짧게, 윗머리는 세워 얼굴이 길어 보이게 합니다.'),
+        ('male', '사각형(Square Face)', '포마드 스타일', '깔끔한 가르마로 남성적이고 신뢰감 있는 인상을 줍니다.'),
+        ('male', '하트형(Heart Face)', '내린 머리 쉐도우 펌', '이마를 가려 턱으로 가는 시선을 분산시킵니다.'),
+        ('male', '긴형(Long Face)', '가르마 펌 (사이드 볼륨)', '옆 볼륨을 살려 가로 폭을 넓어 보이게 하세요.')
     ]
-
     # 5. 데이터 삽입
     cur.executemany(
-        'INSERT INTO hair_recommend (face_shape, style_name, advice) VALUES (?, ?, ?)', 
+        'INSERT INTO hair_recommend (gender, face_shape, style_name, advice) VALUES (?, ?, ?, ?)', 
         recommend_list
     )
 
