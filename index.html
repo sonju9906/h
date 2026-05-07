@@ -3,25 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 하어매칭 서비스</title>
+    <title>AI 헤어매칭 서비스</title>
     <style>
         body { font-family: 'Pretendard', -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px; background-color: #f0f2f5; color: #333; }
         .container { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 450px; text-align: center; }
         h1 { font-size: 28px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px; }
         p { color: #666; margin-bottom: 30px; }
-        
+
         #previewContainer { width: 100%; height: 300px; background: #f8f9fa; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #ddd; margin-bottom: 20px; }
         #preview { max-width: 100%; max-height: 100%; display: none; object-fit: cover; }
-        
+
         input[type="file"] { display: none; }
         .file-label { display: inline-block; background-color: #eee; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
         .file-label:hover { background-color: #e0e0e0; }
-        
+
+        .gender-group { margin-bottom: 20px; font-size: 15px; }
+        .gender-group label { cursor: pointer; }
+        .gender-group label + label { margin-left: 20px; }
+
         button { background-color: #4A90E2; color: white; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: 600; width: 100%; transition: 0.3s; }
         button:hover { background-color: #357ABD; transform: translateY(-2px); }
-        
+
         .loading { display: none; margin-top: 20px; font-weight: bold; color: #4A90E2; }
-        
+
         #result { margin-top: 35px; padding: 25px; border-top: 2px solid #f0f0f0; display: none; text-align: left; background: #fbfcfe; border-radius: 0 0 24px 24px; }
         .result-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; color: #4A90E2; }
         .result-item { margin-bottom: 12px; line-height: 1.5; }
@@ -34,21 +38,27 @@
 <div class="container">
     <h1>내 얼굴형 찾기 🔍</h1>
     <p>AI가 분석하는 가장 잘 어울리는 헤어스타일</p>
-    
+
     <label for="fileInput" class="file-label">📸 사진 선택하기</label>
     <input type="file" id="fileInput" accept="image/*">
-    
+
     <div id="previewContainer">
         <span id="placeholder" style="color: #aaa;">이미지를 업로드 해주세요</span>
         <img id="preview" src="#">
     </div>
-    
+
+    <!-- ⭐ 성별 선택 (컨테이너 안, 버튼 위) -->
+    <div class="gender-group">
+        <label><input type="radio" name="gender" value="male" checked> 남성</label>
+        <label><input type="radio" name="gender" value="female"> 여성</label>
+    </div>
+
     <button onclick="uploadImage()">분석 시작하기</button>
     <div class="loading" id="loading">✨ AI가 얼굴형을 분석 중입니다...</div>
 
     <div id="result">
         <div class="result-title">분석 결과</div>
-        <div class="result-item"><span class="label">결과형:</span> <span id="faceShape" style="font-weight: 800;">-</span></div>
+        <div class="result-item"><span class="label">얼굴형:</span> <span id="faceShape" style="font-weight: 800;">-</span></div>
         <div class="result-item"><span class="label">추천 헤어:</span> <span id="hairStyle" style="color: #d9534f; font-weight: bold;">-</span></div>
         <div class="result-item"><span class="label">전문가 팁:</span><br><span id="advice">-</span></div>
     </div>
@@ -60,14 +70,14 @@
     const placeholder = document.getElementById('placeholder');
 
     // 파일 선택 시 미리보기 처리
-    fileInput.onchange = evt => {
+    fileInput.onchange = () => {
         const [file] = fileInput.files;
         if (file) {
             preview.src = URL.createObjectURL(file);
             preview.style.display = 'block';
             placeholder.style.display = 'none';
         }
-    }
+    };
 
     async function uploadImage() {
         const file = fileInput.files[0];
@@ -76,15 +86,18 @@
             return;
         }
 
+        // ⭐ 선택된 성별 값 가져오기
+        const gender = document.querySelector('input[name="gender"]:checked').value;
+
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("gender", gender);   // ⭐ 서버로 함께 전송
 
         // UI 상태 초기화
         document.getElementById('loading').style.display = 'block';
         document.getElementById('result').style.display = 'none';
 
         try {
-            // FastAPI 서버로 요청 전송
             const response = await fetch('http://127.0.0.1:8000/analyze', {
                 method: 'POST',
                 body: formData
@@ -93,7 +106,6 @@
             const data = await response.json();
 
             if (data.status === "success") {
-                // 서버 응답 데이터 매칭
                 document.getElementById('faceShape').innerText = data.face_shape;
                 document.getElementById('hairStyle').innerText = data.recommendation.hair_style;
                 document.getElementById('advice').innerText = data.recommendation.advice;
