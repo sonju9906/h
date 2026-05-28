@@ -3,124 +3,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 헤어매칭 서비스</title>
+    <title>HairMatch - AI 기반 헤어스타일 찾기</title>
     <style>
-        body { font-family: 'Pretendard', -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px; background-color: #f0f2f5; color: #333; }
-        .container { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 450px; text-align: center; }
-        h1 { font-size: 28px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px; }
-        p { color: #666; margin-bottom: 30px; }
+        :root {
+            --primary-color: #4A90E2;
+            --primary-hover: #357ABD;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #666666;
+            --border-radius: 24px;
+        }
 
-        #previewContainer { width: 100%; height: 300px; background: #f8f9fa; border-radius: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px dashed #ddd; margin-bottom: 20px; }
-        #preview { max-width: 100%; max-height: 100%; display: none; object-fit: cover; }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            height: 100vh;
+            width: 100vw;
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
 
-        input[type="file"] { display: none; }
-        .file-label { display: inline-block; background-color: #eee; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
-        .file-label:hover { background-color: #e0e0e0; }
+        .workspace {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            height: 100%;
+            align-items: stretch;
+        }
 
-        .gender-group { margin-bottom: 20px; font-size: 15px; }
-        .gender-group label { cursor: pointer; }
-        .gender-group label + label { margin-left: 20px; }
+        .main-container {
+            flex: 1; 
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
 
-        button { background-color: #4A90E2; color: white; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: 600; width: 100%; transition: 0.3s; }
-        button:hover { background-color: #357ABD; transform: translateY(-2px); }
+        .header-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 200px; 
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+        }
 
-        .loading { display: none; margin-top: 20px; font-weight: bold; color: #4A90E2; }
+        .logo-box {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 16px 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .logo-box h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--text-main); }
+        .logo-box p { margin: 4px 0 0 0; font-size: 13px; color: var(--primary-color); font-weight: 600; }
 
-        #result { margin-top: 35px; padding: 25px; border-top: 2px solid #f0f0f0; display: none; text-align: left; background: #fbfcfe; border-radius: 0 0 24px 24px; }
-        .result-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; color: #4A90E2; }
-        .result-item { margin-bottom: 12px; line-height: 1.5; }
-        .label { font-weight: bold; color: #555; margin-right: 5px; }
-        #advice { color: #666; font-size: 14px; }
+        .description-box {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-sub);
+            border: 1px solid #e2e8f0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .auth-box .btn-auth {
+            display: block;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            background: var(--primary-color);
+            color: white;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            box-sizing: border-box;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .auth-box .btn-auth:hover { background: var(--primary-hover); }
+        .auth-box .status-logged {
+            display: none;
+            background: #ebf5ff;
+            color: var(--primary-color);
+            border: 1px solid #bddeff;
+            cursor: default;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1.3fr 0.8fr; 
+            gap: 24px;
+            flex: 1; 
+            min-height: 0; 
+        }
+
+        .column-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 24px;
+        }
+
+        /* 홍보용 이미지 및 업로드 박스 크기 */
+        .display-box {
+            background: #fdfdfd;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            width: 100%;
+            flex: 3.5; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #999;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* 홍보 전용 텍스트 배너 라벨 */
+        .promo-label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 6px 14px;
+            font-size: 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            z-index: 2;
+        }
+
+        .custom-bottom-space {
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .upload-box {
+            cursor: pointer;
+            border: 2px dashed #d0d5dd;
+            background: #f8f9fa;
+            transition: 0.2s;
+        }
+        .upload-box:hover {
+            border-color: var(--primary-color);
+            background: #f4f8ff;
+            color: var(--primary-color);
+        }
+        .upload-box input[type="file"] { display: none; }
+        .upload-icon { font-size: 42px; margin-bottom: 12px; display: block; }
+
+        /* [핵심 추가] 분석하기 대형 스위치 버튼 */
+        .btn-analyze {
+            display: none; /* 파일이 선택되기 전에는 숨김 */
+            width: 100%;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.2);
+        }
+        .btn-analyze:hover { background: #27ae60; }
+
+        /* 파일이 선택되었을 때의 업로드 박스 스타일 */
+        .upload-box.file-selected {
+            border-style: solid;
+            border-color: var(--primary-color);
+            background: #fff;
+        }
+
+        .sidebar-right {
+            display: none; 
+            width: 320px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
+            padding: 40px 30px;
+            box-sizing: border-box;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-section-title { font-size: 12px; color: var(--primary-color); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .user-name-card { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 35px; padding-bottom: 20px; border-bottom: 2px solid #f0f2f5; }
+        
+        .menu-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .menu-list li { font-size: 16px; font-weight: 600; color: #444; padding: 16px 0; border-bottom: 1px solid #f8f9fa; cursor: pointer; transition: 0.2s; }
+        .menu-list li:hover { color: var(--primary-color); padding-left: 5px; }
+
+        .btn-logout {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #d9534f;
+            transition: 0.2s;
+            text-align: center;
+            margin-top: auto;
+            width: 100%;
+        }
+        .btn-logout:hover { background: #fff5f5; border-color: #fabfbf; }
+
+        .img-render { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>내 얼굴형 찾기 🔍</h1>
-    <p>AI가 분석하는 가장 잘 어울리는 헤어스타일</p>
+    <div class="workspace">
+        <div class="main-container">
+            
+            <header class="header-grid">
+                <div class="logo-box">
+                    <h2>헤어매치</h2>
+                    <p>AI 기반 헤어스타일 찾기</p>
+                </div>
+                <div class="description-box">빈칸</div>
+                <div class="auth-box">
+                    <a href="login.html" id="guestBtn" class="btn-auth">로그인 / 회원가입</a>
+                    <div id="userStatusBtn" class="btn-auth status-logged">회원 인증 완료 ✓</div>
+                </div>
+            </header>
 
-    <label for="fileInput" class="file-label">📸 사진 선택하기</label>
-    <input type="file" id="fileInput" accept="image/*">
+            <div class="content-grid">
+                
+                <div class="column-wrapper">
+                    <div class="display-box">
+                        <span class="promo-label">BEFORE 예시</span>
+                        <img src="promo_before.jpg" class="img-render" alt="홍보용 전 사진 기본 이미지" onerror="this.style.display='none';">
+                        <span style="color:#bbb; font-size:16px;">홍보용 전 사진 위치</span>
+                    </div>
+                    <div class="custom-bottom-space"></div>
+                </div>
 
-    <div id="previewContainer">
-        <span id="placeholder" style="color: #aaa;">이미지를 업로드 해주세요</span>
-        <img id="preview" src="#">
+                <div class="column-wrapper">
+                    <div class="display-box">
+                        <span class="promo-label" style="background: #e74c3c;">AFTER 추천 예시</span>
+                        <img src="promo_after.jpg" class="img-render" alt="홍보용 후 사진 추천 이미지" onerror="this.style.display='none';">
+                        <span style="color:#bbb; font-size:16px;">홍보용 후 사진 위치</span>
+                    </div>
+                    <div class="custom-bottom-space"></div>
+                </div>
+
+                <div class="column-wrapper">
+                    <label class="display-box upload-box" for="fileInput" id="uploadSlot">
+                        <span class="upload-icon" id="slotIcon">📁</span>
+                        <span id="slotText">사진 업로드</span>
+                        <img id="userPreview" class="img-render" style="display: none;" alt="내 사진 미리보기">
+                        <input type="file" id="fileInput" accept="image/*">
+                    </label>
+                    
+                    <div class="custom-bottom-space" style="display: flex; flex-direction: column; justify-content: flex-start;">
+                        <button class="btn-analyze" id="analyzeBtn" onclick="requestAnalysis()">✨ AI 분석 시작하기</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <aside class="sidebar-right" id="sidebarRight">
+            <div class="sidebar-section-title">ACCOUNT PROFILE</div>
+            <div class="user-name-card" id="userNameSlot">사용자 명</div>
+            <ul class="menu-list">
+                <li>사용자 정보</li>
+                <li>계정 보안 관리</li>
+                <li>분석 히스토리 다시보기</li>
+                <li>업데이트 소식</li>
+            </ul>
+            <button class="btn-logout" id="logoutBtn" onclick="fireLogout()">안전하게 로그아웃</button>
+        </aside>
     </div>
 
-    <!-- ⭐ 성별 선택 (컨테이너 안, 버튼 위) -->
-    <div class="gender-group">
-        <label><input type="radio" name="gender" value="male" checked> 남성</label>
-        <label><input type="radio" name="gender" value="female"> 여성</label>
-    </div>
+    <script>
+        let selectedFile = null;
 
-    <button onclick="uploadImage()">분석 시작하기</button>
-    <div class="loading" id="loading">✨ AI가 얼굴형을 분석 중입니다...</div>
+document.addEventListener("DOMContentLoaded", () => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const userName = localStorage.getItem("userName");
 
-    <div id="result">
-        <div class="result-title">분석 결과</div>
-        <div class="result-item"><span class="label">얼굴형:</span> <span id="faceShape" style="font-weight: 800;">-</span></div>
-        <div class="result-item"><span class="label">추천 헤어:</span> <span id="hairStyle" style="color: #d9534f; font-weight: bold;">-</span></div>
-        <div class="result-item"><span class="label">전문가 팁:</span><br><span id="advice">-</span></div>
-    </div>
-</div>
-
-<script>
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const placeholder = document.getElementById('placeholder');
-
-    // 파일 선택 시 미리보기 처리
-    fileInput.onchange = () => {
-        const [file] = fileInput.files;
-        if (file) {
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = 'block';
-            placeholder.style.display = 'none';
-        }
-    };
-
-    async function uploadImage() {
-        const file = fileInput.files[0];
-        if (!file) {
-            alert("사진을 먼저 선택해주세요!");
-            return;
-        }
-
-        // ⭐ 선택된 성별 값 가져오기
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("gender", gender);   // ⭐ 서버로 함께 전송
-
-        // UI 상태 초기화
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('result').style.display = 'none';
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/analyze', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.status === "success") {
-                document.getElementById('faceShape').innerText = data.face_shape;
-                document.getElementById('hairStyle').innerText = data.recommendation.hair_style;
-                document.getElementById('advice').innerText = data.recommendation.advice;
-                document.getElementById('result').style.display = 'block';
-            } else {
-                alert("분석 실패: " + (data.message || "알 수 없는 오류"));
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("서버 연결에 실패했습니다. FastAPI가 실행 중인지 확인하세요.");
-        } finally {
-            document.getElementById('loading').style.display = 'none';
-        }
+    if (isLoggedIn === "true" && userName) {
+        document.getElementById("guestBtn").style.display = "none";
+        document.getElementById("userStatusBtn").style.display = "block";
+        const sidebar = document.getElementById("sidebarRight");
+        sidebar.style.display = "flex";
+        document.getElementById("userNameSlot").innerText = userName + " 님";
     }
-</script>
+});
 
+// 사용자가 사진을 선택했을 때 UI 미리보기만 처리
+const fileInput = document.getElementById('fileInput');
+fileInput.onchange = () => {
+    const [file] = fileInput.files;
+    if (file) {
+        selectedFile = file;
+        
+        // 메인 화면 UI에 유저가 올린 사진 임시 장착
+        document.getElementById('userPreview').src = URL.createObjectURL(file);
+        document.getElementById('userPreview').style.display = 'block';
+        document.getElementById('slotIcon').style.display = 'none';
+        document.getElementById('slotText').style.display = 'none';
+        document.getElementById('uploadSlot').classList.add('file-selected');
+
+        // 분석하기 버튼 노출
+        document.getElementById('analyzeBtn').style.display = 'block';
+    }
+};
+
+// 파일을 Base64 문자열로 변환해주는 Promise 함수 (안정성 확보)
+function convertFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+}
+
+// 분석하기 버튼 클릭 시 호출 프로시저
+async function requestAnalysis() {
+    if (!selectedFile) return alert("분석할 이미지를 먼저 선택해 주세요.");
+
+    const gender = localStorage.getItem("userGender") || "male";
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("gender", gender);
+
+    // 버튼 로딩 상태 디자인 피드백 제공
+    const btn = document.getElementById('analyzeBtn');
+    btn.innerText = "⚡ AI 분석을 요청하고 있습니다...";
+    btn.style.background = "#95a5a6";
+    btn.disabled = true;
+
+    try {
+        // [수정 핵심 1] 이미지가 완전히 문자열로 바뀔 때까지 기다린 후 sessionStorage에 저장 (안전성)
+        const base64Image = await convertFileToBase64(selectedFile);
+        sessionStorage.setItem("userUploadedBlob", base64Image);
+
+        // FastAPI 서버와 통신
+        const response = await fetch('http://127.0.0.1:8000/analyze', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        if (response.ok && data.status === "success") {
+            // 결과 데이터를 세션에 저장
+            sessionStorage.setItem("latestReport", JSON.stringify(data));
+            
+            // 데이터 저장 완료 후 안전하게 결과 페이지로 전환
+            window.location.href = "result.html";
+        } else {
+            alert("FastAPI 분석에 실패했습니다: " + (data.detail || "알 수 없는 에러"));
+            resetBtn(btn);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("FastAPI 백엔드와의 서버 접속 회선이 끊겨 있습니다.");
+        resetBtn(btn);
+    }
+}
+
+function resetBtn(btn) {
+    btn.innerText = "✨ AI 분석 시작하기";
+    btn.style.background = "#2ecc71";
+    btn.disabled = false;
+}
+
+function fireLogout() {
+    if (confirm("로그아웃 하시겠습니까?")) {
+        localStorage.clear();
+        window.location.reload();
+    }
+}
+    </script>
 </body>
 </html>

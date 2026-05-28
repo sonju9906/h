@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - HairMatch</title>
+    <style>
+        body { font-family: 'Pretendard', -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; color: #333; }
+        .login-container { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 350px; text-align: center; }
+        h2 { font-size: 24px; font-weight: 800; margin-bottom: 10px; color: #1a1a1a; }
+        p { color: #666; font-size: 14px; margin-bottom: 30px; }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.2s; }
+        input:focus { outline: none; border-color: #4A90E2; box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1); }
+
+        button { background-color: #4A90E2; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; margin-top: 10px; transition: 0.3s; }
+        button:hover { background-color: #357ABD; transform: translateY(-2px); }
+
+        .links { margin-top: 20px; font-size: 13px; color: #888; }
+        .links a { color: #4A90E2; text-decoration: none; font-weight: 600; }
+        .back-home { display: inline-block; margin-top: 15px; font-size: 13px; color: #aaa; text-decoration: none; }
+        
+        .loading { display: none; margin-top: 10px; font-size: 12px; color: #4A90E2; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h2>로그인</h2>
+    <p>HairMatch 서비스에 오신 것을 환영합니다.</p>
+
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="text" id="loginId" placeholder="아이디" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="loginPw" placeholder="비밀번호" required>
+        </div>
+        <button type="submit" id="loginBtn">로그인 하기</button>
+        <div id="loadingMsg" class="loading">로그인 중...</div>
+    </form>
+
+    <div class="links">
+        계정이 없으신가요? <a href="signup.html">회원가입</a>
+    </div>
+    <a href="index.html" class="back-home">메인으로 돌아가기</a>
+</div>
+
+<script>
+    document.getElementById('loginForm').onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const loginBtn = document.getElementById('loginBtn');
+        const loadingMsg = document.getElementById('loadingMsg');
+        
+        const username = document.getElementById('loginId').value;
+        const password = document.getElementById('loginPw').value;
+
+        // UI 상태 업데이트
+        loginBtn.disabled = true;
+        loadingMsg.style.display = 'block';
+
+        // 서버 전송용 폼 데이터 생성
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        try {
+            // 1. FastAPI 로그인 API 호출
+            const response = await fetch('http://127.0.0.1:8000/login', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            // 2. 결과 처리
+            if (response.ok && data.status === "success") {
+                // 로그인 성공 시 브라우저에 유저 정보 저장 및 상태 유지
+                localStorage.setItem("userName", data.user_name);
+                localStorage.setItem("userGender", data.user_gender); // 성별 정보도 함께 저장
+                localStorage.setItem("isLoggedIn", "true");
+                
+                alert(data.message);
+                window.location.href = "index.html"; 
+            } else {
+                // 실패 메시지 처리 (401 에러 등)
+                alert("로그인 실패: " + (data.detail || data.message || "아이디 또는 비밀번호를 확인하세요."));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("서버와 연결할 수 없습니다. FastAPI 서버가 작동 중인지 확인하세요.");
+        } finally {
+            // 버튼 상태 복구
+            loginBtn.disabled = false;
+            loadingMsg.style.display = 'none';
+        }
+    };
+</script>
+
+</body>
+</html>

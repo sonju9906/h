@@ -1,0 +1,92 @@
+/* 기본 네비게이션 바 설정 */
+.navbar {
+    display: flex;
+    justify-content: space-between; /* 로고는 왼쪽, 메뉴는 오른쪽 */
+    align-items: center;
+    padding: 1rem 5%;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 30px; /* 메뉴와 버튼 사이 간격 */
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+/* 로그인/회원가입 버튼 스타일 */
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-login {
+    text-decoration: none;
+    padding: 8px 16px;
+    color: #555;
+}
+
+.btn-signup {
+    text-decoration: none;
+    padding: 8px 20px;
+    background-color: #4A90E2; /* 프로젝트 포인트 컬러 */
+    color: white;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.btn-signup:hover {
+    background-color: #357ABD;
+}
+/* 모달 배경 애니메이션 */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.4); 
+    backdrop-filter: blur(5px); /* 배경 흐림 효과 */
+    transition: all 0.3s ease;
+}
+
+/* 모달창 등장 애니메이션 */
+.modal-content {
+    background-color: white; 
+    padding: 30px; 
+    border-radius: 20px; 
+    width: 380px; 
+    transform: translateY(-20px); /* 살짝 위에서 내려오는 효과 */
+    animation: modalShow 0.3s forwards;
+}
+
+@keyframes modalShow {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 입력창 포커스 효과 */
+.modal-input:focus {
+    outline: none;
+    border-color: #4A90E2;
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+}
+
+/* 닫기 버튼 효과 */
+.close:hover {
+    color: #333;
+    transform: rotate(90deg);
+    transition: 0.2s;
+}

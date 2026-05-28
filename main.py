@@ -2,10 +2,11 @@ import cv2
 import mediapipe as mp
 import tensorflow as tf
 import numpy as np
-import sqlite3
+import psycopg2  # [수정] sqlite3 대신 PostgreSQL 전용 드라이버 라이브러리 임포트
 import io
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import create_engine  # 상단에 engine 생성을 위한 모듈 추가
 
 app = FastAPI()
 
@@ -17,6 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# [수정] B 방식 적용: 변수명 및 URL 지정
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:설치시비밀번호@localhost:5432/hairmatch_db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
 # 1. 전역 리소스 로드
 model = tf.keras.models.load_model("hairmatch_face_model.keras")
 mp_face_mesh = mp.solutions.face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1)
@@ -24,16 +29,25 @@ class_names = ['Heart Face', 'Long Face', 'Oval Face', 'Round Face', 'Square Fac
 
 
 def get_db_recommendation(face_shape: str, gender: str):
-    """face_shape + gender 조합으로 추천 정보 조회"""
-    conn = sqlite3.connect('capstone_design.db')
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT style_name, advice FROM hair_recommend WHERE face_shape = ? AND gender = ?",
-        (face_shape, gender)
-    )
-    result = cur.fetchone()
-    conn.close()
-    return result
+    """face_shape + gender 조합으로 추천 정보 조회 (PostgreSQL 문법 반영)"""
+    try:
+        # [수정] psycopg2를 활용해 원격 데이터베이스 접속 자원을 획득합니다.
+        conn = psycopg2.connect(SQLALCHEMY_DATABASE_URL)
+        cur = conn.cursor()
+        
+        # [수정] PostgreSQL은 플레이스홀더로 물음표(?) 대신 %s 를 사용해야 합니다.
+        cur.execute(
+            "SELECT style_name, advice FROM hair_recommend WHERE face_shape = %s AND gender = %s",
+            (face_shape, gender)
+        )
+        result = cur.fetchone()
+        return result
+    except Exception as e:
+        print(f"추천 정보 조회 중 서버 에러 발생: {e}")
+        return None
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
 
 
 @app.post("/analyze")

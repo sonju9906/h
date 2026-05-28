@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HairMatch - AI 스타일 분석 결과 리포트</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --primary-hover: #357ABD;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #666666;
+            --border-radius: 24px;
+        }
+        body {
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .result-container {
+            width: 100%;
+            max-width: 1000px; /* 좌우 레이아웃 확보를 위해 최대 너비 확장 */
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            padding: 45px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h2 { font-size: 28px; margin: 0 0 10px 0; color: var(--primary-color); font-weight: 800; }
+        .sub-title { font-size: 15px; color: #666; margin-bottom: 40px; }
+        
+        /* [핵심 추가] 사용자가 올린 사진과 결과 폼을 좌우로 배치하는 그리드 */
+        .report-layout-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 30px;
+            margin-bottom: 35px;
+            align-items: stretch;
+        }
+
+        /* [좌측] 사용자가 업로드했던 원본 사진 컨테이너 */
+        .user-photo-box {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 380px;
+        }
+        .user-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 6px 14px;
+            font-size: 11px;
+            border-radius: 20px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        /* [우측] 리포트 데이터 구역 */
+        .report-card {
+            background: #fcfdfe;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #e4eefc;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .report-item {
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .report-item:last-of-type { border-bottom: none; margin-bottom: 0; }
+        .label { display: block; font-size: 13px; font-weight: 700; color: var(--primary-color); margin-bottom: 6px; letter-spacing: 0.5px; }
+        .val { font-size: 20px; font-weight: 800; color: var(--text-main); }
+        
+        /* [핵심 추가] 우측 하단 유도용 커스텀 마케팅 배너 상자 */
+        .marketing-promo-banner {
+            background: #fff9e6;
+            border: 1px solid #ffe8a1;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.6;
+            color: #b7791f;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .btn-home {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-home:hover { background: var(--primary-hover); }
+    </style>
+</head>
+<body>
+
+    <div class="result-container">
+        <h2>AI 헤어 스타일 리포트</h2>
+        <div class="sub-title">헤어매치가 분석한 당신만을 위한 정밀 매칭 결과 가이드 라인입니다.</div>
+
+        <div class="report-layout-grid">
+            
+            <div class="user-photo-box">
+                <span class="photo-badge">분석된 내 사진</span>
+                <img id="userAnalyzedImg" src="" alt="사용자 업로드 이미지">
+            </div>
+
+            <div class="report-card">
+                <div>
+                    <div class="report-item">
+                        <span class="label">🔍 분석된 얼굴 형태</span>
+                        <div class="val" id="viewShape" style="font-size: 22px; color: #2c3e50;">형태 분석 중...</div>
+                    </div>
+                    <div class="report-item">
+                        <span class="label">✂️ 가장 잘 어울리는 헤어스타일</span>
+                        <div class="val" id="viewStyle" style="font-size: 22px; color: #e74c3c;">스타일 매칭 중...</div>
+                    </div>
+                    <div class="report-item">
+                        <span class="label">💡 전문가의 스타일링 솔루션</span>
+                        <div class="val" id="viewAdvice" style="font-size: 15px; font-weight: 500; line-height: 1.6; color: #555;">솔루션 구성 중...</div>
+                    </div>
+                </div>
+
+                <div class="marketing-promo-banner" id="resultPromoBanner">
+                    <span>💡</span>
+                    <div>
+                        <strong>지금 바로 로그인해보세요!</strong><br>
+                        주변 미용실 즉시 예약 기능, 맞춤형 스타일링 포트폴리오 저장소 등 회원님만을 위한 더 많은 맞춤형 정보와 서비스를 무료로 이용하실 수 있습니다.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="btn-container">
+            <a href="index.html" class="btn-home">돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+       document.addEventListener("DOMContentLoaded", () => {
+    // 1. JSON 텍스트 리포트 데이터 가져오기
+    const rawData = sessionStorage.getItem("latestReport");
+    // 2. [수정] sessionStorage에서 이미지 데이터 읽어오기
+    const userImgData = sessionStorage.getItem("userUploadedBlob");
+    
+    if (!rawData) {
+        alert("유효한 분석 리포트 세션이 존재하지 않습니다. 메인화면으로 복귀합니다.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    const data = JSON.parse(rawData);
+    
+    // 데이터 맵핑 파싱 주입
+    document.getElementById("viewShape").innerText = data.face_shape + "형";
+    document.getElementById("viewStyle").innerText = data.recommendation.hair_style;
+    document.getElementById("viewAdvice").innerText = data.recommendation.advice;
+
+    // 이미지 노드에 할당
+    if (userImgData) {
+        document.getElementById("userAnalyzedImg").src = userImgData;
+    } else {
+        document.getElementById("userAnalyzedImg").alt = "이미지 데이터를 불러올 수 없습니다.";
+    }
+
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (isLoggedIn === "true") {
+        document.getElementById("resultPromoBanner").style.display = "none";
+    }
+});
+    </script>
+</body>
+</html>

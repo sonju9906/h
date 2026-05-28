@@ -5,11 +5,28 @@ def setup_database():
     conn = sqlite3.connect('capstone_design.db')
     cur = conn.cursor()
 
-    # 2. 기존 테이블이 있다면 삭제 (초기화용)
+    # ---------------------------------------------------------
+    # [추가] 2. 회원 정보 테이블 (users) 생성
+    # ---------------------------------------------------------
+    # 초기화가 필요하다면 아래 주석을 해제하세요.
+    # cur.execute('DROP TABLE IF EXISTS users')
+    
+    cur.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,  -- 로그인 아이디
+        password TEXT NOT NULL,         -- 해싱된 비밀번호
+        email TEXT NOT NULL,
+        name TEXT NOT NULL,
+        gender TEXT NOT NULL            -- 'male' 또는 'female'
+    )
+    ''')
+
+    # ---------------------------------------------------------
+    # 3. 헤어 추천 테이블 (hair_recommend) 생성 및 초기화
+    # ---------------------------------------------------------
     cur.execute('DROP TABLE IF EXISTS hair_recommend')
 
-    # 3. 테이블 생성
-    # face_shape: AI 모델의 결과값과 매칭되는 이름
     cur.execute('''
     CREATE TABLE hair_recommend (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +38,6 @@ def setup_database():
     ''')
 
     # 4. 추천 데이터 리스트 
-    # 중요: 첫 번째 항목(face_shape)은 train.py에서 출력된 class_names와 정확히 일치해야 합니다.
     recommend_list = [
         # --- 여성 (female) ---
         ('female', '계란형(Oval Face)', '웨이브 단발', '세련미를 더하는 볼륨 웨이브를 추천합니다.'),
@@ -37,6 +53,7 @@ def setup_database():
         ('male', '하트형(Heart Face)', '내린 머리 쉐도우 펌', '이마를 가려 턱으로 가는 시선을 분산시킵니다.'),
         ('male', '긴형(Long Face)', '가르마 펌 (사이드 볼륨)', '옆 볼륨을 살려 가로 폭을 넓어 보이게 하세요.')
     ]
+
     # 5. 데이터 삽입
     cur.executemany(
         'INSERT INTO hair_recommend (gender, face_shape, style_name, advice) VALUES (?, ?, ?, ?)', 
@@ -46,7 +63,7 @@ def setup_database():
     # 6. 저장 및 종료
     conn.commit()
     conn.close()
-    print("✅ DB 설정 완료: 'capstone_design.db' 파일이 생성되었습니다.")
+    print("✅ DB 설정 완료: 'users' 및 'hair_recommend' 테이블이 준비되었습니다.")
 
 if __name__ == "__main__":
     setup_database()
