@@ -1,0 +1,34 @@
+-- 1. 회원 정보 테이블 생성 (아이디 중복 방지 unique 제약 포함)
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    gender VARCHAR(20) NOT NULL
+);
+
+-- 2. 헤어 추천 가이드 정보 테이블 생성
+CREATE TABLE IF NOT EXISTS hair_recommend (
+    id SERIAL PRIMARY KEY,
+    face_shape VARCHAR(50) NOT NULL,
+    gender VARCHAR(20) NOT NULL,
+    style_name VARCHAR(100) NOT NULL,
+    advice TEXT NOT NULL
+);
+
+-- 3. 헤어 추천 테이블 초기 데이터 삽입 (기존 데이터가 없을 때만 실행)
+INSERT INTO hair_recommend (face_shape, gender, style_name, advice) VALUES
+-- 남성 데이터 (FastAPI class_names 영문 기준 매칭)
+('Heart Face', 'male', '시스루 댄디컷', '하트형 얼굴은 턱이 날카롭기 때문에 이마를 살짝 가리는 시스루 댄디컷으로 윗볼륨을 살려주면 부드러운 인상을 줍니다.'),
+('Long Face', 'male', '리프컷', '긴 얼굴형은 옆볼륨을 살리는 것이 중요합니다. 리프컷이나 가르마 스타일로 시선을 옆으로 분산시켜 주세요.'),
+('Oval Face', 'male', '아이비리그컷', '계란형 얼굴은 어떤 스타일이든 잘 어울립니다. 이마를 시원하게 드러내는 아이비리그컷으로 뚜렷한 이목구비를 강조해 보세요.'),
+('Round Face', 'male', '포마드 스타일', '둥근 얼굴형은 세로 라인을 살려야 합니다. 앞머리를 세우는 포마드 스타일이나 리젠트컷으로 얼굴을 길어 보이게 연출하세요.'),
+('Square Face', 'male', '소프트 투블럭 가르마컷', '각진 사각진 얼굴형은 강한 인상을 줄 수 있으므로 자연스러운 곡선 느낌의 가르마컷으로 턱선을 부드럽게 감싸주는 것이 좋습니다.'),
+
+-- 여성 데이터
+('Heart Face', 'female', '사이드뱅 레이어드컷', '턱선이 뾰족한 하트형은 광대와 볼을 부드럽게 감싸는 사이드뱅이나 굵은 웨이브 스타일이 턱선을 보완해 줍니다.'),
+('Long Face', 'female', '풀뱅 앞머리 + 히피펌', '얼굴 길이를 짧아 보이게 하려면 풀뱅으로 이마를 가리고, 옆머리에 풍성한 볼륨을 주는 히피펌이나 굵은 펌을 추천합니다.'),
+('Oval Face', 'female', '단발 태슬컷', '이상적인 계란형은 턱선을 깔끔하게 살려주는 단발 태슬컷이나 긴 생머리 등 모든 헤어스타일을 완벽하게 소화할 수 있습니다.'),
+('Round Face', 'female', '엘리자벳펌', '둥근 얼굴을 갸름해 보이게 하려면 정수리 볼륨을 살리고 흐르는 듯한 사이드뱅을 연출할 수 있는 긴 머리 레이어드 S컬펌을 추천합니다.'),
+('Square Face', 'female', '미디움 레이어드 C컬펌', '각진 턱을 커버하기 위해 턱선 아래부터 층을 내는 레이어드 컷에 안쪽으로 말리는 C컬을 넣어주면 중성적인 매력을 부드럽게 바꿔줍니다.');
